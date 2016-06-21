@@ -100,7 +100,7 @@ Used to parse data from a file/buffer.
 
 
 <a name="/read" />
-### read(data, cb)
+### read(data, cb, parser)
 
 Used to further parse the data into a human readable format.
 
@@ -108,6 +108,7 @@ Used to further parse the data into a human readable format.
 
 1. **data {*}** The data passed by the [`parse`](#/parse) callback.
 2. **cb {Function}** A callback used to return either an error or the parsed data `(error, readData)` as arguments.
+3. **parser {Parser}** An instance of a [`binary-buffer-parser`](http://github.com/pupix/binary-buffer-parser).
 
 <a name="/extract" />
 ### extract(data, output, cb)
@@ -119,6 +120,8 @@ Used to write the parsed data to disk.
 1. **data {*}** The data passed by the [`read`](#/read) callback.
 2. **output {string}** The path where the file should be stored.
 3. **cb {Function}** A callback used to return either an error or the written data `(error, fileData)` as arguments.
+4. **parser {Parser}** An instance of a [`binary-buffer-parser`](http://github.com/pupix/binary-buffer-parser).
+
 
 
 ---
