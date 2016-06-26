@@ -153,28 +153,28 @@ It will create a data structure and write it to disk.
 
 ### parse(input, cb)
 
-It will parse a file from the `input` path.
+It will parse a file from the `input` path/buffer.
 
 **Parameters**
 
-1. **input {string}** A path to where the file to parse resides.
+1. **input {string, Buffer}** A path to where the file to parse resides, or the file's buffer itself.
 2. **[cb] {Function}** A callback called with `(error, parsedData)` as arguments.
 
 ### read(input, cb)
 
-It will parse and create a human readable structure of a file from the `input` path.
+It will parse and create a human readable structure of a file from the `input` path/buffer.
 
 **Parameters**
 
-1. **input {string}** A path to where the file to read resides.
+1. **input {string, Buffer}** A path to where the file to parse resides, or the file's buffer itself.
 2. **[cb] {Function}** A callback called with `(error, readData)` as arguments.
 
 ### extract(input, output, cb)
 
-It will read a file and store a human readable version of it on disk.
+It will read a file/buffer and store a human readable version of it on disk.
 
 **Parameters**
 
-1. **input {string}** A path to where the file to read resides.
+1. **input {string, Buffer}** A path to where the file to parse resides, or the file's buffer itself.
 2. **output {string}** The path where the file should be stored.
 3. **[cb] {Function}** A callback called with `(error, fileContents)` as arguments.
