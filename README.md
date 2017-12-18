@@ -1,47 +1,46 @@
-# lol-file-parser
+# 📄 lol-file-parser
 
 A factory used to create generic file parsers.
+
+[![Build Status](https://travis-ci.org/Pupix/lol-file-parser.svg?branch=master)](https://travis-ci.org/Pupix/lol-file-parser)
+[![Pupix's Discord](https://img.shields.io/badge/discord-My%20projects-738bd7.svg?style=flat)](https://discord.gg/hPtrMcx)
 
 ## Download
 lol-file-parser is installable via:
 
 - [GitHub](https://github.com/Pupix/lol-file-parser) `git clone https://github.com/Pupix/lol-file-parser.git`
 - [npm](https://www.npmjs.com/): `npm install lol-file-parser`
+- [yarn](https://yarnpkg.com/): `yarn add lol-file-parser`
 
 ## Usage example
 
 ```js
-var fs = require('fs'),
+var fs = require('fs-extra'),
     fileParser = require('lol-file-parser'),
     
     // Create a JSONParser Class
-    JSONParser = fileParser({
+    class JSONParser extends FileParser {
     
-        name: 'JSONFile',
-
-        parse: function (parser, cb) {
-            cb(null, parser.stringView().join(''));
-        },
-
-        read: function (data, cb) {
-            cb(null, JSON.parse(data));
+        async _parse(parser) {
+            return parser.string(parser.size());
         }
-    }),
+
+        async _read(parsedData) {
+            return JSON.parse(parsedData);
+        }
+    }
     
     // Create an instance of out new class 
     json = new JSONParser();
     
     // Read the package.json file
-    json.read('package.json', function (err, data) {
-        console.log(typeof data); // Object
-        console.log(data);
-        //  {
-        //      "name": "lol-file-parser",
-        //      "license": "MIT",
-        //      "homepage": "https://github.com/Pupix/lol-file-parser",
-        //      ...
-        //  }
-    });
+    json.read('package.json').then(console.log)
+    //  {
+    //      "name": "lol-file-parser",
+    //      "license": "MIT",
+    //      "homepage": "https://github.com/Pupix/lol-file-parser",
+    //      ...
+    //  }
 
 ```
 
@@ -51,78 +50,79 @@ var fs = require('fs'),
 
 The parser has two flows and each further method depends on the previous one
 
-[`create`](#/create) => [`write`](#/write)
+[`_create`](#/_create) => [`_write`](#/_write)
 
-[`parse`](#/parse) => [`read`](#/read) => [`extract`](#/extract)
+[`_parse`](#/_parse) => [`_read`](#/_read) => [`_extract`](#/_extract)
 
 ---
 
 ## Configuring the parser
 
-To create a parser you need to pass a configuration object.
+To create a parser you need to extend the base parser and override the
+following methods:
 
-It can contain the following properties:
+<a name="/_create" />
+### _create(data)
 
-### name
-
-The name of your class, default is `LoLFileParser`
-
-<a name="/create" />
-### create(data, cb)
-
-Used to create a file structure.
+Used to create a data structure.
 
 **Parameters**
 
-1. **data {*}** The data passed by a user.
-2. **cb {Function}** A callback used to return either an error or the created data `(error, createdData)` as arguments.
+1. **data {*}** Initial data to generate the structure.
 
-<a name="/write" />
-### write(data, output, cb)
+**Returns**
+Promise
+
+<a name="/_write" />
+### _write(data, output)
 
 Used to write data to disk.
 
 **Parameters**
 
-1. **data {*}** The data passed by the [`create`](#/create) callback.
+1. **createdData {*}** The data passed by [`_create`](#/_create).
 2. **output {string}** The path where the file should be stored.
-3. **cb {Function}** A callback used to return either an error or the contents of the written file `(error, fileContents)` as arguments.
 
-<a name="/parse" />
-### parse(parser, cb)
+**Returns**
+Promise
 
-Used to parse data from a file/buffer.
+---
+
+### _parse(parser)
+
+Used to parse data from a file / buffer.
 
 **Parameters**
 
 1. **parser {*}** An instance of a [`binary-buffer-parser`](http://github.com/pupix/binary-buffer-parser).
-2. **cb {Function}** A callback used to return either an error or the parsed data `(error, parsedData)` as arguments.
 
+**Returns**
+Promise
 
-<a name="/read" />
-### read(data, cb, parser)
+### _read(parsedData, parser)
 
 Used to further parse the data into a human readable format.
 
 **Parameters**
 
-1. **data {*}** The data passed by the [`parse`](#/parse) callback.
-2. **cb {Function}** A callback used to return either an error or the parsed data `(error, readData)` as arguments.
-3. **parser {Parser}** An instance of a [`binary-buffer-parser`](http://github.com/pupix/binary-buffer-parser).
+1. **data {*}** The data passed by [`_parse`](#/_parse).
+2. **parser {Parser}** An instance of a [`binary-buffer-parser`](http://github.com/pupix/binary-buffer-parser).
 
-<a name="/extract" />
-### extract(data, output, cb)
+**Returns**
+Promise
+
+### _extract(data, output)
 
 Used to write the parsed data to disk.
 
 **Parameters**
 
-1. **data {*}** The data passed by the [`read`](#/read) callback.
+1. **data {*}** The data passed by [`_read`](#/_read).
 2. **output {string}** The path where the file should be stored.
-3. **cb {Function}** A callback used to return either an error or the written data `(error, fileData)` as arguments.
-4. **parser {Parser}** An instance of a [`binary-buffer-parser`](http://github.com/pupix/binary-buffer-parser).
+3. **parser {Parser}** An instance of a [`binary-buffer-parser`](http://github.com/pupix/binary-buffer-parser).
 
-
+**Returns**
+Promise
 
 ---
 
@@ -130,18 +130,18 @@ Used to write the parsed data to disk.
 
 After you set up your parser and create an instance, the following methods will be available:
 
-**N.B:** The methods act as promises if no callback is passed.
+### create(data)
 
-### create(data, cb)
-
-It will create a data structure from the original data.
+It will create a data structure from the passed data.
 
 **Parameters**
 
 1. **data {*}** The original data.
-2. **[cb] {Function}** A callback called with `(error, createdData)` as arguments.
 
-### write(data, output, cb)
+** Returns**
+Promise
+
+### write(data, output)
 
 It will create a data structure and write it to disk.
 
@@ -149,16 +149,22 @@ It will create a data structure and write it to disk.
 
 1. **data {*}** The original data.
 2. **output {string}** The path where the file should be stored.
-3. **[cb] {Function}** A callback called with `(error, fileContents)` as arguments.
+
+** Returns**
+Promise
+
+---
 
 ### parse(input, cb)
 
-It will parse a file from the `input` path/buffer.
+It will parse a file from the `input` file / buffer.
 
 **Parameters**
 
 1. **input {string, Buffer}** A path to where the file to parse resides, or the file's buffer itself.
-2. **[cb] {Function}** A callback called with `(error, parsedData)` as arguments.
+
+** Returns**
+Promise
 
 ### read(input, cb)
 
@@ -167,14 +173,18 @@ It will parse and create a human readable structure of a file from the `input` p
 **Parameters**
 
 1. **input {string, Buffer}** A path to where the file to parse resides, or the file's buffer itself.
-2. **[cb] {Function}** A callback called with `(error, readData)` as arguments.
+
+** Returns**
+Promise
 
 ### extract(input, output, cb)
 
-It will read a file/buffer and store a human readable version of it on disk.
+It will read a file / buffer and store a human readable version of it on disk.
 
 **Parameters**
 
 1. **input {string, Buffer}** A path to where the file to parse resides, or the file's buffer itself.
 2. **output {string}** The path where the file should be stored.
-3. **[cb] {Function}** A callback called with `(error, fileContents)` as arguments.
+
+** Returns**
+Promise
